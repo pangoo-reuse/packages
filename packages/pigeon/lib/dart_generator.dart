@@ -24,7 +24,7 @@ void _writeHostApi(DartOptions opt, Indent indent, Api api) {
         argSignature = '${func.argType} arg';
         sendArgument = 'requestMap';
         requestMapDeclaration =
-            'final Map<dynamic, dynamic> requestMap = arg._toMap();';
+            'final Map<dynamic, dynamic> requestMap = arg.toMap();';
       }
       indent.write(
           'Future<${func.returnType}> ${func.name}($argSignature) async ');
@@ -43,7 +43,7 @@ void _writeHostApi(DartOptions opt, Indent indent, Api api) {
         indent.writeln('');
         final String returnStatement = func.returnType == 'void'
             ? '// noop'
-            : 'return ${func.returnType}._fromMap(replyMap[\'${Keys.result}\']);';
+            : 'return ${func.returnType}.fromMap(replyMap[\'${Keys.result}\']);';
         indent.format(
             '''final Map<dynamic, dynamic>$nullTag replyMap = await channel.send($sendArgument);
 if (replyMap == null) {
@@ -116,7 +116,7 @@ void _writeFlutterApi(DartOptions opt, Indent indent, Api api,
                 indent.writeln(
                     'final Map<dynamic, dynamic> mapMessage = message as Map<dynamic, dynamic>;');
                 indent.writeln(
-                    'final $argType input = $argType._fromMap(mapMessage);');
+                    'final $argType input = $argType.fromMap(mapMessage);');
                 call = 'api.${func.name}(input)';
               }
               if (returnType == 'void') {
@@ -130,7 +130,7 @@ void _writeFlutterApi(DartOptions opt, Indent indent, Api api,
                 } else {
                   indent.writeln('final $returnType output = $call;');
                 }
-                const String returnExpresion = 'output._toMap()';
+                const String returnExpresion = 'output.toMap()';
                 final String returnStatement = isMockHandler
                     ? 'return <dynamic, dynamic>{\'${Keys.result}\': $returnExpresion};'
                     : 'return $returnExpresion;';
@@ -172,7 +172,7 @@ void generateDart(DartOptions opt, Root root, StringSink sink) {
         indent.writeln('$datatype ${field.name};');
       }
       indent.writeln('// ignore: unused_element');
-      indent.write('Map<dynamic, dynamic> _toMap() ');
+      indent.write('Map<dynamic, dynamic> toMap() ');
       indent.scoped('{', '}', () {
         indent.writeln(
             'final Map<dynamic, dynamic> pigeonMap = <dynamic, dynamic>{};');
@@ -180,7 +180,7 @@ void generateDart(DartOptions opt, Root root, StringSink sink) {
           indent.write('pigeonMap[\'${field.name}\'] = ');
           if (customClassNames.contains(field.dataType)) {
             indent.addln(
-                '${field.name} == null ? null : ${field.name}$nullBang._toMap();');
+                '${field.name} == null ? null : ${field.name}$nullBang.toMap();');
           } else {
             indent.addln('${field.name};');
           }
@@ -189,14 +189,14 @@ void generateDart(DartOptions opt, Root root, StringSink sink) {
       });
       indent.writeln('// ignore: unused_element');
       indent.write(
-          'static ${klass.name} _fromMap(Map<dynamic, dynamic> pigeonMap) ');
+          'static ${klass.name} fromMap(Map<dynamic, dynamic> pigeonMap) ');
       indent.scoped('{', '}', () {
         indent.writeln('final ${klass.name} result = ${klass.name}();');
         for (Field field in klass.fields) {
           indent.write('result.${field.name} = ');
           if (customClassNames.contains(field.dataType)) {
             indent.addln(
-                'pigeonMap[\'${field.name}\'] != null ? ${field.dataType}._fromMap(pigeonMap[\'${field.name}\']) : null;');
+                'pigeonMap[\'${field.name}\'] != null ? ${field.dataType}.fromMap(pigeonMap[\'${field.name}\']) : null;');
           } else {
             indent.addln('pigeonMap[\'${field.name}\'];');
           }
